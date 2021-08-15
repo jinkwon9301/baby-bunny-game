@@ -1,0 +1,53 @@
+html, body {
+    margin: 0;
+}
+
+.landing-page {
+    display: flex;
+    flex-direction: column;
+}
+
+.title {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.start-button,
+.restart-button 
+{
+    display: block;
+    height: 30px;
+    margin: 10px auto;
+}
+
+.landing-page img,
+.main-board
+{
+    display: block;
+    margin: 0 auto;
+    width: 600px;
+    height: 600px;
+    border: 1px solid white;
+}
+
+.board-row {
+    display: flex;
+    height: 150px;
+    width: 600px;
+}
+
+.board-row__cell {
+    width: 150px;
+    height: 150px;
+    border-bottom: 1px solid white;
+    border-right: 1px solid white;
+}
+
+.board-row__cell img {
+    width: 145px;
+    height: 145px;
+}
+
+.invisible {
+    display: none;
+}
