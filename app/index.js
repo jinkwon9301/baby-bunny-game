@@ -26,7 +26,7 @@ const images = [1,2,3,4,5,6,7,8];
 
 const INVISIBLE = "invisible";
 const ORIGINAL = "original-image";
-const FAKE = "fake-image";
+const outsideImage = "outside-image";
 const SHOWING_IMAGE = "showing-image";
 const FINDED_IMAGE = "finded-image";
 const INITIAL_TIME = 30;
@@ -49,23 +49,21 @@ function startGame() {
     $reStartButton.classList.remove(INVISIBLE);
     $statusDisplay.classList.remove(INVISIBLE);
 
-    makeFakePicture();
+    makeOutsidePicture();
     makeBunnyPicture();
 
-    $boardRowCells.forEach(function(target) {
-        target.addEventListener("click", showOriginalImage);
-    })
+    $boardRowCells.forEach(target => target.addEventListener("click", showOriginalImage));
 
     limitTime = setTimeout(countTime, 1000);
     $timer.innerHTML = `제한 시간 : ${time} 초`;
 }
 
-function makeFakePicture() {
+function makeOutsidePicture() {
     for (let i = 0; i < $boardRowCells.length; i++) {
         const image = document.createElement("img");
-        image.setAttribute("src", "img/fake.png");
+        image.setAttribute("src", "img/outside.png");
         $boardRowCells[i].appendChild(image);
-        image.classList.add(FAKE);
+        image.classList.add(outsideImage);
     }
 }
 
@@ -84,48 +82,50 @@ function makeBunnyPicture() {
 }
 
 function showOriginalImage(event) {
-    event.currentTarget.childNodes[0].classList.add(INVISIBLE);
-    event.currentTarget.childNodes[1].classList.remove(INVISIBLE);
-    event.currentTarget.classList.add(SHOWING_IMAGE);
-    showingImages.push(event.currentTarget);
+    const outsideImage = event.currentTarget.childNodes[0];
+    const originalImage = event.currentTarget.childNodes[1];
+    const currentImage = event.currentTarget;
+
+    outsideImage.classList.add(INVISIBLE);
+    originalImage.classList.remove(INVISIBLE);
+    currentImage.classList.add(SHOWING_IMAGE);
+    showingImages.push(currentImage);
+
+    currentImage.removeEventListener("click", showOriginalImage);
 
     if (showingImages.length === 2) {
-        $boardRowCells.forEach(function(target) {
-            target.removeEventListener("click", showOriginalImage);
-        })
-        setTimeout(confirmSamePicture, 500);
+        confirmSamePicture();
     }
 
-    event.currentTarget.removeEventListener("click", showOriginalImage);
 }
 
 function confirmSamePicture() {
-    if (showingImages[0].childNodes[1].className === showingImages[1].childNodes[1].className) {
+    const outsideImages = [showingImages[0].childNodes[0], showingImages[1].childNodes[0]];
+    const originalImages = [showingImages[0].childNodes[1], showingImages[1].childNodes[1]];
+
+    showingImages.forEach(picture => picture.classList.remove(SHOWING_IMAGE));
+    showingImages.forEach(target => target.addEventListener("click", showOriginalImage));
+
+    if (originalImages[0].className === originalImages[1].className) {
+        showingImages.forEach(target => target.removeEventListener("click", showOriginalImage));
         soundPass.play();
-        showingImages[0].classList.add(FINDED_IMAGE);
-        showingImages[1].classList.add(FINDED_IMAGE);
-        showingImages[0].classList.remove(SHOWING_IMAGE);
-        showingImages[1].classList.remove(SHOWING_IMAGE);
+        showingImages.forEach(picture => picture.classList.add(FINDED_IMAGE));
+
         findedImages += 2;
         if (findedImages === 16) {
             soundWin.play();
             endGame();
             $endingPage.textContent = '다 찾았다!';
         }
-    } else {
-        soundFail.play();
-        showingImages[0].childNodes[0].classList.remove(INVISIBLE);
-        showingImages[0].childNodes[1].classList.add(INVISIBLE);
-        showingImages[0].classList.remove(SHOWING_IMAGE);
+        showingImages = [];
+        return;
+    } 
 
-        showingImages[1].childNodes[0].classList.remove(INVISIBLE);
-        showingImages[1].childNodes[1].classList.add(INVISIBLE);
-        showingImages[1].classList.remove(SHOWING_IMAGE);
-    }
-    $boardRowCells.forEach(function(target) {
-        if (!target.classList[1]) target.addEventListener("click", showOriginalImage);
-    })
-
+    soundFail.play();
+    setTimeout(function() {        
+        outsideImages.forEach(picture => picture.classList.remove(INVISIBLE));
+        originalImages.forEach(picture => picture.classList.add(INVISIBLE));
+    }, 500)
     showingImages = [];
 }
 
@@ -134,9 +134,7 @@ function restartGame() {
     clearInterval(limitTime);
     findedImages = 0;
 
-    $boardRowCells.forEach(function(target) {
-        target.removeEventListener("click", showOriginalImage);
-    })
+    $boardRowCells.forEach(target => target.removeEventListener("click", showOriginalImage));
 
     $boardRowCells.forEach(function(target) {
         target.classList.remove(FINDED_IMAGE);
