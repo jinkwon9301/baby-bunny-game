@@ -113,6 +113,7 @@ function confirmSamePicture() {
 
         findedImages += 2;
         if (findedImages === 16) {
+            clearInterval(limitTime);
             soundWin.play();
             endGame();
             $endingPage.textContent = '다 찾았다!';
